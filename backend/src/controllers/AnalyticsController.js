@@ -1,0 +1,145 @@
+const Event = require('../models/Event');
+const Metric = require('../models/Metric');
+const redis = require('redis');
+const { REDIS_URL, CACHE_TTL } = require('../config/index');
+
+let redisClient;
+(async () => {
+  redisClient = redis.createClient({ url: REDIS_URL });
+  redisClient.on('error', (err) => {
+    if (err.code !== 'ECONNREFUSED') {
+      console.error('Redis Client Error', err);
+    }
+  });
+  await redisClient.connect().catch(() => {});
+})();
+
+const getDAU = async (req, res) => {
+  try {
+    const cacheKey = 'dau_stats';
+    let cachedData = null;
+    if (redisClient && redisClient.isOpen) {
+      cachedData = await redisClient.get(cacheKey);
+    }
+    if (cachedData) return res.json(JSON.parse(cachedData));
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const dau = await Event.distinct('userId', {
+      timestamp: { $gte: startOfDay }
+    });
+
+    const response = { dau: dau.length, date: startOfDay };
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(response));
+    }
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching DAU:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const getWAU = async (req, res) => {
+  try {
+    const cacheKey = 'wau_stats';
+    let cachedData = null;
+    if (redisClient && redisClient.isOpen) {
+      cachedData = await redisClient.get(cacheKey);
+    }
+    if (cachedData) return res.json(JSON.parse(cachedData));
+
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - 7);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const wau = await Event.distinct('userId', {
+      timestamp: { $gte: startOfWeek }
+    });
+
+    const response = { wau: wau.length, date: startOfWeek };
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(response));
+    }
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching WAU:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const getRevenue = async (req, res) => {
+  try {
+    const cacheKey = 'revenue_stats';
+    let cachedData = null;
+    if (redisClient && redisClient.isOpen) {
+      cachedData = await redisClient.get(cacheKey);
+    }
+    if (cachedData) return res.json(JSON.parse(cachedData));
+
+    const revenueData = await Event.aggregate([
+      { $match: { eventType: 'purchase' } },
+      { $group: { _id: null, total: { $sum: { $toDouble: '$metadata.revenue' } } } }
+    ]);
+
+    const totalRevenue = revenueData.length > 0 ? revenueData[0].total : 0;
+    const response = { totalRevenue };
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(response));
+    }
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching revenue:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const getEventCounts = async (req, res) => {
+  try {
+    const cacheKey = 'event_counts';
+    let cachedData = null;
+    if (redisClient && redisClient.isOpen) {
+      cachedData = await redisClient.get(cacheKey);
+    }
+    if (cachedData) return res.json(JSON.parse(cachedData));
+
+    const counts = await Event.aggregate([
+      { $group: { _id: '$eventType', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(counts));
+    }
+    res.json(counts);
+  } catch (error) {
+    console.error('Error fetching event counts:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const getFunnel = async (req, res) => {
+  try {
+    const funnelSteps = ['view', 'click', 'purchase'];
+    const funnel = [];
+
+    for (const step of funnelSteps) {
+      const users = await Event.distinct('userId', { eventType: step });
+      funnel.push({ step, count: users.length });
+    }
+
+    res.json(funnel);
+  } catch (error) {
+    console.error('Error fetching funnel:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+module.exports = {
+  getDAU,
+  getWAU,
+  getRevenue,
+  getEventCounts,
+  getFunnel,
+};

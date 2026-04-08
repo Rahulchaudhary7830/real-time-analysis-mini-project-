@@ -7,6 +7,7 @@ const MetricSchema = new mongoose.Schema({
   metadata: { type: Map, of: mongoose.Schema.Types.Mixed },
 }, { timestamps: true });
 
+
 MetricSchema.index({ metricName: 1, date: 1 }, { unique: true });
 
 

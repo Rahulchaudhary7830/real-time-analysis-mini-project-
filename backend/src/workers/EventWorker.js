@@ -4,6 +4,7 @@ const { processBatchWithStreams } = require('../services/StreamProcessor');
 
 let worker;
 
+
 const processJob = async (job) => {
   try {
     const { name, data } = job;
@@ -36,3 +37,5 @@ if (useRedis) {
 mockQueue.on('process', processJob);
 
 module.exports = worker;
+
+//eventworking processs analyze the backend working and process

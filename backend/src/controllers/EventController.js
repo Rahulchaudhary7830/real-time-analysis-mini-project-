@@ -13,6 +13,8 @@ const collectEvent = async (req, res) => {
     const device = agent.toString();
     const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
+
+
     const eventPayload = {
       userId,
       eventType,
@@ -40,6 +42,7 @@ const collectEvent = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 module.exports = {
   collectEvent,

@@ -102,6 +102,7 @@ const getEventCounts = async (req, res) => {
     if (redisClient && redisClient.isOpen) {
       cachedData = await redisClient.get(cacheKey);
     }
+
     if (cachedData) return res.json(JSON.parse(cachedData));
 
     const counts = await Event.aggregate([
@@ -113,6 +114,7 @@ const getEventCounts = async (req, res) => {
       await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(counts));
     }
     res.json(counts);
+
   } catch (error) {
     console.error('Error fetching event counts:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -126,6 +128,7 @@ const getFunnel = async (req, res) => {
 
     for (const step of funnelSteps) {
       const users = await Event.distinct('userId', { eventType: step });
+
       funnel.push({ step, count: users.length });
     }
 
@@ -134,7 +137,10 @@ const getFunnel = async (req, res) => {
     console.error('Error fetching funnel:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+
 };
+
+
 
 module.exports = {
   getDAU,

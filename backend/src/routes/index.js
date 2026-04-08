@@ -12,6 +12,7 @@ const {
 // Event Collection
 router.post('/event', collectEvent);
 
+
 // Analytics APIs
 router.get('/dau', getDAU);
 router.get('/wau', getWAU);

@@ -9,4 +9,5 @@ const MetricSchema = new mongoose.Schema({
 
 MetricSchema.index({ metricName: 1, date: 1 }, { unique: true });
 
+
 module.exports = mongoose.model('Metric', MetricSchema);

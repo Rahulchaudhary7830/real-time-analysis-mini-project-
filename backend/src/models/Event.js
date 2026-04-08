@@ -11,6 +11,8 @@ const EventSchema = new mongoose.Schema({
   sessionID: { type: String, index: true },
 }, { timestamps: true });
 
+
+
 EventSchema.index({ eventType: 1, timestamp: -1 });
 EventSchema.index({ userId: 1, timestamp: -1 });
 

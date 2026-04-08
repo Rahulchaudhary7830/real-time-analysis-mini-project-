@@ -13,6 +13,7 @@ class StorageService {
 
   // --- EVENT OPERATIONS ---
 
+  
   static async saveEvent(eventData) {
     if (this.isConnected()) {
       try {

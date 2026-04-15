@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Premium - Ultimate Demo Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        .product-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .product-card:hover { transform: translateY(-12px); }
+        .glass-effect { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .hero-gradient { background: radial-gradient(circle at top right, #eef2ff 0%, #f8fafc 100%); }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-900">
+    <!-- Top Global Banner -->
+    <div class="bg-indigo-600 text-white text-center py-2 text-xs font-bold tracking-widest uppercase">
+        Free Worldwide Shipping on all Premium Orders
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass-effect border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-12">
+                    <div class="flex items-center gap-2 cursor-pointer" onclick="trackEvent('click', { target: 'logo' })">
+                        <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                            <span class="text-white font-black text-xl italic">N</span>
+                        </div>
+                        <h1 class="text-2xl font-extrabold tracking-tight">NEXUS<span class="text-indigo-600">.</span></h1>
+                    </div>
+                    <div class="hidden md:flex space-x-10 text-sm font-bold text-slate-500 uppercase tracking-wider">
+                        <button onclick="scrollToSection('hero'); trackEvent('view', { page: 'home' })" class="hover:text-indigo-600 transition-colors">Home</button>
+                        <button onclick="scrollToSection('products'); trackEvent('view', { page: 'shop' })" class="hover:text-indigo-600 transition-colors">Shop</button>
+                        <button onclick="trackEvent('view', { page: 'support' })" class="hover:text-indigo-600 transition-colors">Support</button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-6">
+                    <!-- Cart Preview (Functional Placeholder) -->
+                    <button onclick="trackEvent('click', { target: 'cart_icon' })" class="relative p-2 text-slate-600 hover:text-indigo-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span id="cart-count" class="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">0</span>
+                    </button>
+
+                    <div id="user-logged-out" class="flex items-center gap-4">
+                        <button onclick="showLoginModal()" class="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors uppercase">Login</button>
+                        <button onclick="showSignupModal()" class="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-indigo-600 shadow-xl shadow-slate-200 transition-all active:scale-95 uppercase tracking-wide">Get Started</button>
+                    </div>
+                    
+                    <div id="user-logged-in" class="hidden flex items-center gap-4">
+                        <div class="flex flex-col items-end">
+                            <span id="user-display-name" class="text-sm font-bold text-slate-900">User</span>
+                            <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-tighter">Premium Member</span>
+                        </div>
+                        <div class="h-10 w-10 bg-slate-200 rounded-full flex items-center justify-center border-2 border-indigo-500 overflow-hidden">
+                            <img id="user-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar">
+                        </div>
+                        <button onclick="handleLogout()" class="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="hero" class="hero-gradient relative pt-20 pb-32 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10">
+            <div class="max-w-2xl text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+                    </span>
+                    Live Now: Spring Collection 2026
+                </div>
+                <h2 class="text-5xl md:text-7xl font-black tracking-tighter leading-tight mb-8">
+                    Elegance in <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Every Detail.</span>
+                </h2>
+                <p class="text-xl text-slate-500 font-medium mb-10 leading-relaxed">
+                    Elevate your digital life with our curated selection of high-performance gear and minimalist aesthetics.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+                    <button onclick="scrollToSection('products'); trackEvent('click', { target: 'hero_primary' })" class="bg-indigo-600 text-white px-10 py-5 rounded-2xl text-lg font-bold shadow-2xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 transition-all active:scale-95">Shop the Collection</button>
+                    <button onclick="trackEvent('click', { target: 'hero_secondary' })" class="bg-white text-slate-900 border-2 border-slate-100 px-10 py-5 rounded-2xl text-lg font-bold hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-95">Our Story</button>
+                </div>
+            </div>
+            <div class="relative w-full max-w-lg lg:max-w-none">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000" alt="hero product" class="rounded-[40px] shadow-2xl animate-float object-cover aspect-[4/5] lg:aspect-auto">
+                <div class="absolute -bottom-6 -left-6 glass-effect p-6 rounded-3xl shadow-xl">
+                    <div class="flex items-center gap-4">
+                        <div class="flex -space-x-3">
+                            <img src="https://i.pravatar.cc/100?u=1" class="w-10 h-10 rounded-full border-2 border-white">
+                            <img src="https://i.pravatar.cc/100?u=2" class="w-10 h-10 rounded-full border-2 border-white">
+                            <img src="https://i.pravatar.cc/100?u=3" class="w-10 h-10 rounded-full border-2 border-white">
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-900">500+ Happy Customers</p>
+                            <p class="text-[10px] text-slate-500 font-medium italic">"Best purchase of 2026!"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Products Grid -->
+    <section id="products" class="max-w-7xl mx-auto py-32 px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-20">
+            <div class="max-w-xl">
+                <h3 class="text-4xl font-extrabold tracking-tight mb-4 italic">Featured <span class="text-indigo-600 underline decoration-indigo-200 underline-offset-8">Drops</span></h3>
+                <p class="text-lg text-slate-500 font-medium leading-relaxed">Our latest innovations designed to merge seamless technology with unmatched comfort.</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="filterCategory('all')" class="bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 uppercase tracking-widest">All</button>
+                <button onclick="filterCategory('audio')" class="bg-white text-slate-500 px-6 py-3 rounded-xl text-sm font-bold hover:text-indigo-600 transition-colors uppercase tracking-widest">Audio</button>
+                <button onclick="filterCategory('wearables')" class="bg-white text-slate-500 px-6 py-3 rounded-xl text-sm font-bold hover:text-indigo-600 transition-colors uppercase tracking-widest">Wearables</button>
+            </div>
+        </div>
+
+        <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
+            <!-- Products will be injected here by JS -->
+        </div>
+    </section>
+
+    <!-- Newsletter (Funnel Stage) -->
+    <section class="bg-slate-900 py-16 rounded-[40px] mx-8 mb-24 overflow-hidden relative">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500 rounded-full blur-[100px]"></div>
+        </div>
+        <div class="max-w-3xl mx-auto px-4 text-center relative z-10">
+            <h3 class="text-2xl md:text-3xl font-black text-white mb-4">Join the Nexus Elite</h3>
+            <p class="text-slate-400 text-sm mb-8">Get early access to drops and exclusive analytics insights.</p>
+            <div class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                <input type="email" id="newsletter-email" placeholder="Enter your email" class="flex-1 bg-white/10 border border-white/20 px-5 py-3 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                <button onclick="subscribeNewsletter()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-xl shadow-indigo-900 transition-all active:scale-95 uppercase tracking-widest">Subscribe</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-16 border-t border-slate-200">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
+            <div class="col-span-2">
+                <h4 class="text-xl font-extrabold mb-6 uppercase tracking-widest">Nexus<span class="text-indigo-600">.</span></h4>
+                <p class="text-slate-500 max-w-sm font-medium leading-relaxed">Defining the next era of lifestyle technology with a focus on privacy, design, and seamless integration.</p>
+            </div>
+            <div>
+                <h5 class="font-bold mb-6 uppercase text-xs tracking-widest text-slate-400">Shop</h5>
+                <ul class="space-y-4 font-bold text-sm text-slate-600">
+                    <li><button onclick="trackEvent('click', { target: 'footer_audio' })" class="hover:text-indigo-600">Audio</button></li>
+                    <li><button onclick="trackEvent('click', { target: 'footer_gear' })" class="hover:text-indigo-600">Tech Gear</button></li>
+                    <li><button onclick="trackEvent('click', { target: 'footer_limited' })" class="hover:text-indigo-600">Limited Edition</button></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-bold mb-6 uppercase text-xs tracking-widest text-slate-400">Social</h5>
+                <ul class="space-y-4 font-bold text-sm text-slate-600">
+                    <li><button onclick="trackEvent('click', { target: 'social_twitter' })" class="hover:text-indigo-600">Twitter</button></li>
+                    <li><button onclick="trackEvent('click', { target: 'social_instagram' })" class="hover:text-indigo-600">Instagram</button></li>
+                </ul>
+            </div>
+        </div>
+        <div class="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-slate-100 gap-6">
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">&copy; 2026 Nexus Premium Labs. All rights reserved.</p>
+            <div class="flex gap-8 text-slate-400 text-xs font-bold uppercase tracking-widest">
+                <button onclick="trackEvent('view', { page: 'privacy' })" class="hover:text-slate-900">Privacy Policy</button>
+                <button onclick="trackEvent('view', { page: 'terms' })" class="hover:text-slate-900">Terms of Service</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Auth Modal -->
+    <div id="login-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="hideModal()"></div>
+        <div class="bg-white rounded-[40px] p-10 max-w-md w-full shadow-2xl relative z-10 transform transition-all border border-slate-100">
+            <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-8 mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <h3 id="modal-title" class="text-3xl font-black text-slate-900 mb-2 text-center tracking-tight">Welcome Back</h3>
+            <p class="text-slate-500 mb-10 text-center font-medium">Join the elite community of Nexus owners.</p>
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+                    <input type="email" id="email" placeholder="name@premium.com" class="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 focus:outline-none focus:border-indigo-500 transition-all font-bold text-slate-900 placeholder:text-slate-300">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" class="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 focus:outline-none focus:border-indigo-500 transition-all font-bold text-slate-900 placeholder:text-slate-300">
+                </div>
+                <button id="modal-btn" onclick="processAuth()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-600 shadow-2xl shadow-indigo-100 transition-all transform active:scale-95 uppercase tracking-wide">Authenticate</button>
+                <button onclick="hideModal()" class="w-full text-slate-400 text-xs font-black uppercase tracking-widest hover:text-slate-900 transition-colors">Maybe Later</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="status-toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[70] bg-slate-900 text-white px-8 py-4 rounded-[20px] text-xs font-black uppercase tracking-widest shadow-2xl opacity-0 transform translate-y-10 transition-all pointer-events-none flex items-center gap-3">
+        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+        <span id="toast-text">Event tracked</span>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/event';
+        let currentAuthType = 'login';
+        let cart = 0;
+
+        const PRODUCTS = [
+            { id: 1, name: 'Nexus Audio X1', price: 349, category: 'audio', img: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80', badge: 'Best Seller' },
+            { id: 2, name: 'Serie 5 Vision', price: 499, category: 'wearables', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80', badge: 'New Drop' },
+            { id: 3, name: 'Sonic Buds Pro', price: 189, category: 'audio', img: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=600&q=80', badge: 'Limited' },
+            { id: 4, name: 'Titanium Shell', price: 129, category: 'accessories', img: 'https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?auto=format&fit=crop&w=600&q=80', badge: 'Popular' },
+            { id: 5, name: 'Nexus Smart Ring', price: 299, category: 'wearables', img: 'https://images.unsplash.com/photo-1586105251261-72a756497a11?auto=format&fit=crop&w=600&q=80', badge: 'Hot' },
+            { id: 6, name: 'Studio Monitor Z', price: 899, category: 'audio', img: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=600&q=80', badge: 'Elite' },
+        ];
+
+        // State Management
+        const storedId = localStorage.getItem('analytics_user_id');
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        
+        const state = {
+            isLoggedIn: isLoggedIn,
+            userId: (isLoggedIn && storedId && storedId.startsWith('user_')) 
+                    ? storedId 
+                    : 'guest_' + Math.floor(Math.random() * 10000)
+        };
+
+        // Always ensure current state ID is saved
+        localStorage.setItem('analytics_user_id', state.userId);
+
+        function renderProducts(items) {
+            const container = document.getElementById('product-list');
+            container.innerHTML = items.map(p => `
+                <div class="bg-white rounded-[40px] p-4 border border-slate-100 product-card shadow-sm group">
+                    <div class="relative rounded-[32px] overflow-hidden aspect-square mb-6">
+                        <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">${p.badge}</div>
+                    </div>
+                    <div class="px-4 pb-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-extrabold tracking-tight">${p.name}</h4>
+                            <span class="text-2xl font-black text-indigo-600">$${p.price}</span>
+                        </div>
+                        <button onclick="buyProduct('${p.name}', ${p.price})" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-sm hover:bg-indigo-600 transition-all active:scale-95 uppercase tracking-widest shadow-xl shadow-slate-100">Buy Now</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCategory(cat) {
+            trackEvent('click', { target: 'category_filter', category: cat });
+            const filtered = cat === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === cat);
+            renderProducts(filtered);
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function trackEvent(eventType, metadata = {}) {
+            console.log('📡 [NEXUS ANALYTICS]:', eventType, metadata);
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: state.userId,
+                        eventType,
+                        metadata: { ...metadata, loggedIn: state.isLoggedIn, platform: 'web_premium' },
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                showToast(`${eventType} event dispatched`);
+            } catch (err) {
+                console.error('Analytics Error:', err);
+            }
+        }
+
+        async function buyProduct(name, price) {
+            cart++;
+            document.getElementById('cart-count').innerText = cart;
+            trackEvent('click', { target: 'add_to_cart', product: name });
+            setTimeout(() => {
+                trackEvent('purchase', { product: name, revenue: price, cart_total: cart });
+            }, 800);
+        }
+
+        async function subscribeNewsletter() {
+            const email = document.getElementById('newsletter-email').value;
+            if (!email) return alert('Please enter your email');
+            await trackEvent('signup', { source: 'newsletter', email });
+            document.getElementById('newsletter-email').value = '';
+            showToast('Welcome to the Elite');
+        }
+
+        function showLoginModal() {
+            currentAuthType = 'login';
+            document.getElementById('modal-title').innerText = 'Welcome Back';
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function showSignupModal() {
+            currentAuthType = 'signup';
+            document.getElementById('modal-title').innerText = 'Create Account';
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function hideModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+
+        async function processAuth() {
+            const email = document.getElementById('email').value;
+            if (!email) return alert('Email required');
+            
+            const newUserId = 'user_' + Math.floor(Math.random() * 100000);
+            state.userId = newUserId;
+            state.isLoggedIn = true;
+            localStorage.setItem('analytics_user_id', newUserId);
+            localStorage.setItem('isLoggedIn', 'true');
+            
+            await trackEvent(currentAuthType, { email });
+            updateUI();
+            hideModal();
+        }
+
+        function handleLogout() {
+            state.isLoggedIn = false;
+            localStorage.removeItem('isLoggedIn');
+            trackEvent('logout');
+            updateUI();
+        }
+
+        function updateUI() {
+            const outGroup = document.getElementById('user-logged-out');
+            const inGroup = document.getElementById('user-logged-in');
+            if (state.isLoggedIn) {
+                outGroup.classList.add('hidden');
+                inGroup.classList.remove('hidden');
+                document.getElementById('user-display-name').innerText = state.userId;
+                document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${state.userId}`;
+            } else {
+                outGroup.classList.remove('hidden');
+                inGroup.classList.add('hidden');
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('status-toast');
+            document.getElementById('toast-text').innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        window.onload = () => {
+            renderProducts(PRODUCTS);
+            updateUI();
+            trackEvent('view', { page: 'home', load_time: performance.now() });
+        };
+    </script>
+</body>
+</html>

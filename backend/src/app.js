@@ -15,7 +15,8 @@ app.use(helmet({
 app.use(cors({ 
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 const limiter = rateLimit({
@@ -26,7 +27,6 @@ app.use(limiter);
 
 app.use(express.json());
 app.use(morgan('dev'));
-
 
 app.get('/', (req, res) => {
   res.send('Backend is running');
@@ -62,8 +62,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-app.use('/api', routes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

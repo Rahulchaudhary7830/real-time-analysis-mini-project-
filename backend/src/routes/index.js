@@ -6,7 +6,8 @@ const {
   getWAU, 
   getRevenue, 
   getEventCounts, 
-  getFunnel 
+  getFunnel,
+  resetData
 } = require('../controllers/AnalyticsController');
 
 // Event Collection
@@ -19,5 +20,6 @@ router.get('/wau', getWAU);
 router.get('/revenue', getRevenue);
 router.get('/events/count', getEventCounts);
 router.get('/funnel', getFunnel);
+router.delete('/reset', resetData);
 
 module.exports = router;

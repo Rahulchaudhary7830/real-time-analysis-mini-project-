@@ -4,35 +4,58 @@ const redis = require('redis');
 const { REDIS_URL, CACHE_TTL } = require('../config/index');
 
 let redisClient;
+let isRedisReady = false;
+
 (async () => {
-  redisClient = redis.createClient({ url: REDIS_URL });
-  redisClient.on('error', (err) => {
-    if (err.code !== 'ECONNREFUSED') {
-      console.error('Redis Client Error', err);
-    }
-  });
-  await redisClient.connect().catch(() => {});
+  try {
+    redisClient = redis.createClient({ url: REDIS_URL });
+    redisClient.on('error', (err) => {
+      isRedisReady = false;
+      if (err.code !== 'ECONNREFUSED') {
+        console.error('Redis Client Error', err);
+      }
+    });
+    redisClient.on('connect', () => {
+      console.log('Redis connected');
+      isRedisReady = true;
+    });
+    redisClient.on('end', () => {
+      isRedisReady = false;
+    });
+    await redisClient.connect();
+  } catch (err) {
+    console.log('Redis connection failed, analytics will proceed without cache');
+    isRedisReady = false;
+  }
 })();
 
 const getDAU = async (req, res) => {
   try {
     const cacheKey = 'dau_stats';
     let cachedData = null;
-    if (redisClient && redisClient.isOpen) {
-      cachedData = await redisClient.get(cacheKey);
+    
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        cachedData = await redisClient.get(cacheKey);
+      } catch (err) {}
     }
+
     if (cachedData) return res.json(JSON.parse(cachedData));
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
     const dau = await Event.distinct('userId', {
-      timestamp: { $gte: startOfDay }
+      timestamp: { $gte: startOfDay },
+      userId: { $regex: /^(?!guest_)/ }
     });
 
     const response = { dau: dau.length, date: startOfDay };
-    if (redisClient && redisClient.isOpen) {
-      await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(response));
+    
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(response));
+      } catch (err) {}
     }
     res.json(response);
   } catch (error) {
@@ -45,8 +68,10 @@ const getWAU = async (req, res) => {
   try {
     const cacheKey = 'wau_stats';
     let cachedData = null;
-    if (redisClient && redisClient.isOpen) {
-      cachedData = await redisClient.get(cacheKey);
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        cachedData = await redisClient.get(cacheKey);
+      } catch (err) {}
     }
     if (cachedData) return res.json(JSON.parse(cachedData));
 
@@ -55,12 +80,15 @@ const getWAU = async (req, res) => {
     startOfWeek.setHours(0, 0, 0, 0);
 
     const wau = await Event.distinct('userId', {
-      timestamp: { $gte: startOfWeek }
+      timestamp: { $gte: startOfWeek },
+      userId: { $regex: /^(?!guest_)/ }
     });
 
     const response = { wau: wau.length, date: startOfWeek };
-    if (redisClient && redisClient.isOpen) {
-      await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(response));
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(response));
+      } catch (err) {}
     }
     res.json(response);
   } catch (error) {
@@ -73,8 +101,10 @@ const getRevenue = async (req, res) => {
   try {
     const cacheKey = 'revenue_stats';
     let cachedData = null;
-    if (redisClient && redisClient.isOpen) {
-      cachedData = await redisClient.get(cacheKey);
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        cachedData = await redisClient.get(cacheKey);
+      } catch (err) {}
     }
     if (cachedData) return res.json(JSON.parse(cachedData));
 
@@ -85,8 +115,10 @@ const getRevenue = async (req, res) => {
 
     const totalRevenue = revenueData.length > 0 ? revenueData[0].total : 0;
     const response = { totalRevenue };
-    if (redisClient && redisClient.isOpen) {
-      await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(response));
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(response));
+      } catch (err) {}
     }
     res.json(response);
   } catch (error) {
@@ -99,8 +131,10 @@ const getEventCounts = async (req, res) => {
   try {
     const cacheKey = 'event_counts';
     let cachedData = null;
-    if (redisClient && redisClient.isOpen) {
-      cachedData = await redisClient.get(cacheKey);
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        cachedData = await redisClient.get(cacheKey);
+      } catch (err) {}
     }
 
     if (cachedData) return res.json(JSON.parse(cachedData));
@@ -110,8 +144,10 @@ const getEventCounts = async (req, res) => {
       { $sort: { count: -1 } }
     ]);
 
-    if (redisClient && redisClient.isOpen) {
-      await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(counts));
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(counts));
+      } catch (err) {}
     }
     res.json(counts);
 
@@ -123,6 +159,15 @@ const getEventCounts = async (req, res) => {
 
 const getFunnel = async (req, res) => {
   try {
+    const cacheKey = 'funnel_stats';
+    let cachedData = null;
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        cachedData = await redisClient.get(cacheKey);
+      } catch (err) {}
+    }
+    if (cachedData) return res.json(JSON.parse(cachedData));
+
     const funnelSteps = ['view', 'click', 'purchase'];
     const funnel = [];
 
@@ -132,6 +177,11 @@ const getFunnel = async (req, res) => {
       funnel.push({ step, count: users.length });
     }
 
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(funnel));
+      } catch (err) {}
+    }
     res.json(funnel);
   } catch (error) {
     console.error('Error fetching funnel:', error);
@@ -140,7 +190,23 @@ const getFunnel = async (req, res) => {
 
 };
 
-
+const resetData = async (req, res) => {
+  try {
+    await Event.deleteMany({});
+    await Metric.deleteMany({});
+    
+    if (isRedisReady && redisClient.isOpen) {
+      try {
+        await redisClient.flushAll();
+      } catch (err) {}
+    }
+    
+    res.json({ message: 'All data and cache have been reset successfully' });
+  } catch (error) {
+    console.error('Error resetting data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 module.exports = {
   getDAU,
@@ -148,4 +214,5 @@ module.exports = {
   getRevenue,
   getEventCounts,
   getFunnel,
+  resetData,
 };

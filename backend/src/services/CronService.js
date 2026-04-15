@@ -23,7 +23,7 @@ const precomputeDailyMetrics = async () => {
 
     const revenueData = await Event.aggregate([
       { $match: { eventType: 'purchase', timestamp: { $gte: yesterday, $lt: today } } },
-      { $group: { _id: null, total: { $sum: '$metadata.revenue' } } }
+      { $group: { _id: null, total: { $sum: { $toDouble: '$metadata.revenue' } } } }
     ]);
 
     const dailyRevenue = revenueData.length > 0 ? revenueData[0].total : 0;

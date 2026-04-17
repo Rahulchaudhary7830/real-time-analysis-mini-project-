@@ -10,7 +10,8 @@ const {
   resetData
 } = require('../controllers/AnalyticsController');
 
-// Event Collection
+
+// Event Collection that help to connect the routes
 router.post('/event', collectEvent);
 
 

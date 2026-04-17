@@ -73,6 +73,7 @@ function App() {
         fetchStats();
       }, 500); // Wait for 500ms of inactivity before fetching again
     });
+    //...
 
     socket.on('connect_error', (err) => {
       console.error('WebSocket Connection Error:', err.message);
